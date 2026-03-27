@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>NFM - Checklista operatora</title>
+  <style>
+    :root {
+      --bg: #f4f5f7;
+      --panel: #ffffff;
+      --text: #1e2430;
+      --muted: #6b7280;
+      --line: #dde2ea;
+      --shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+      --todo-bg: #ffffff;
+      --todo-border: #d9dee8;
+      --progress-bg: #fff2df;
+      --progress-border: #ffb84d;
+      --progress-text: #9a5a00;
+      --done-bg: #e8f7ec;
+      --done-border: #37b26c;
+      --done-text: #17653b;
+      --accent: #334155;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, #eef1f5 0%, #f7f8fa 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      padding: 0;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: max(16px, env(safe-area-inset-top)) 14px max(22px, env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      padding-top: 6px;
+      backdrop-filter: blur(12px);
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(221,226,234,0.9);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 18px 16px 16px;
+      margin-bottom: 12px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      line-height: 1;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 5vw, 34px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      min-height: 54px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px 16px;
+      font-size: 16px;
+      color: var(--text);
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(16,24,40,0.03);
+    }
+
+    input[type="text"]:focus {
+      border-color: #9fb2cc;
+      box-shadow: 0 0 0 4px rgba(86, 118, 161, 0.12);
+    }
+
+    button {
+      border: 0;
+      border-radius: 16px;
+      min-height: 54px;
+      padding: 0 16px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(51, 65, 85, 0.18);
+    }
+
+    button.secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .statusbar {
+      margin-bottom: 12px;
+      padding: 16px;
+    }
+
+    .status-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .event-name {
+      font-weight: 800;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      height: 12px;
+      width: 100%;
+      background: #e6ebf2;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ffb84d 0%, #37b26c 100%);
+      transition: width 180ms ease;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .dot.todo { background: #d4dbe5; }
+    .dot.progress { background: #ffb84d; }
+    .dot.done { background: #37b26c; }
+
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      color: var(--muted);
+      margin: 18px 4px 10px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .item {
+      width: 100%;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 16px;
+      min-height: 72px;
+      border: 2px solid var(--todo-border);
+      border-radius: var(--radius);
+      background: var(--todo-bg);
+      color: var(--text);
+      transition: transform 80ms ease, background 120ms ease, border-color 120ms ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .item:active {
+      transform: scale(0.992);
+    }
+
+    .item.todo {
+      background: var(--todo-bg);
+      border-color: var(--todo-border);
+      color: var(--text);
+    }
+
+    .item.in_progress {
+      background: var(--progress-bg);
+      border-color: var(--progress-border);
+      color: var(--progress-text);
+    }
+
+    .item.done {
+      background: var(--done-bg);
+      border-color: var(--done-border);
+      color: var(--done-text);
+    }
+
+    .item-label {
+      font-size: 17px;
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .badge {
+      min-width: 104px;
+      text-align: center;
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .empty {
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .recent {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      min-height: 40px;
+      border-radius: 999px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: none;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      padding: 8px 12px 2px;
+    }
+
+    @media (max-width: 560px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      button,
+      input[type="text"] {
+        width: 100%;
+      }
+
+      .item {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .badge {
+        min-width: 0;
+        justify-self: start;
+      }
+
+      .status-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .meta {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <section class="hero panel">
+        <div class="eyebrow">NFM / mobilna checklista</div>
+        <h1>Checklista operatora</h1>
+        <div class="sub">Tapnij element raz, by ustawić <strong>in progress</strong>, drugi raz <strong>done</strong>, trzeci raz zresetuje status. Bez logowania, bez bazy, bez kolejnego systemu, który trzeba niańczyć.</div>
+
+        <div class="controls">
+          <input id="eventInput" type="text" placeholder="Wpisz nazwę wydarzenia, np. Anaklasis 12.04.2026" />
+          <button id="openBtn">Otwórz</button>
+        </div>
+
+        <div class="actions">
+          <button id="resetBtn" class="secondary" type="button">Reset statusów</button>
+          <button id="deleteBtn" class="secondary" type="button">Usuń wydarzenie</button>
+        </div>
+
+        <div id="recentWrap" style="display:none;">
+          <div class="section-title" style="margin-top:14px; margin-bottom:8px;">Ostatnie wydarzenia</div>
+          <div id="recentEvents" class="recent"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="statusbar panel">
+      <div class="status-top">
+        <div class="event-name" id="currentEvent">Brak wybranego wydarzenia</div>
+        <div class="meta" id="summary">0 / 0 done</div>
+      </div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="legend">
+        <span><i class="dot todo"></i> do zrobienia</span>
+        <span><i class="dot progress"></i> w toku</span>
+        <span><i class="dot done"></i> gotowe</span>
+      </div>
+    </section>
+
+    <div class="section-title">Lista</div>
+    <main id="checklist" class="list panel" style="padding: 10px;"></main>
+
+    <div class="footer-note">Dane zapisują się lokalnie w tej przeglądarce na tym urządzeniu.</div>
+  </div>
+
+  <script>
+    const CHECKLIST_ITEMS = [
+      "Kamera gotowa do pracy",
+      "Baterie naładowane",
+      "Zapasowe baterie spakowane",
+      "Karty pamięci sformatowane",
+      "Zapasowe karty pamięci spakowane",
+      "Statyw / mocowanie zabrane",
+      "Ładowarki i zasilacze spakowane",
+      "Przewody i adaptery spakowane",
+      "Ustawienia nagrania sprawdzone",
+      "Balans bieli sprawdzony",
+      "Ekspozycja sprawdzona",
+      "Ostrość i test nagrania wykonane",
+      "Dźwięk referencyjny sprawdzony",
+      "Sprzęt oznaczony i gotowy do transportu",
+      "Po nagraniu: materiał zabezpieczony"
+    ];
+
+    const STORAGE_KEY = "nfm_operator_checklist_v1";
+    const STATUSES = ["todo", "in_progress", "done"];
+    const STATUS_LABELS = {
+      todo: "todo",
+      in_progress: "in progress",
+      done: "done"
+    };
+
+    const eventInput = document.getElementById("eventInput");
+    const openBtn = document.getElementById("openBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+    const checklistEl = document.getElementById("checklist");
+    const currentEventEl = document.getElementById("currentEvent");
+    const summaryEl = document.getElementById("summary");
+    const progressFillEl = document.getElementById("progressFill");
+    const recentWrap = document.getElementById("recentWrap");
+    const recentEventsEl = document.getElementById("recentEvents");
+
+    let store = loadStore();
+    let currentEventName = "";
+
+    function createDefaultItems() {
+      return CHECKLIST_ITEMS.map((label, index) => ({ id: index + 1, label, status: "todo" }));
+    }
+
+    function loadStore() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : { events: {}, lastEvent: "" };
+      } catch {
+        return { events: {}, lastEvent: "" };
+      }
+    }
+
+    function saveStore() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    }
+
+    function normalizeName(name) {
+      return name.trim().replace(/\s+/g, " ");
+    }
+
+    function openEvent(name) {
+      const cleanName = normalizeName(name);
+      if (!cleanName) return;
+
+      if (!store.events[cleanName]) {
+        store.events[cleanName] = {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          items: createDefaultItems()
+        };
+      }
+
+      currentEventName = cleanName;
+      store.lastEvent = cleanName;
+      store.events[cleanName].updatedAt = new Date().toISOString();
+      saveStore();
+      eventInput.value = cleanName;
+      render();
+    }
+
+    function cycleStatus(itemId) {
+      if (!currentEventName) return;
+      const event = store.events[currentEventName];
+      if (!event) return;
+
+      const item = event.items.find(x => x.id === itemId);
+      if (!item) return;
+
+      const currentIndex = STATUSES.indexOf(item.status);
+      item.status = STATUSES[(currentIndex + 1) % STATUSES.length];
+      event.updatedAt = new Date().toISOString();
+      saveStore();
+      render();
+    }
+
+    function resetCurrentEvent() {
+      if (!currentEventName) return;
+      const confirmed = confirm(`Zresetować wszystkie statusy dla wydarzenia \"${currentEventName}\"?`);
+      if (!confirmed) return;
+      store.events[currentEventName].items = createDefaultItems();
+      store.events[currentEventName].updatedAt = new Date().toISOString();
+      saveStore();
+      render();
+    }
+
+    function deleteCurrentEvent() {
+      if (!currentEventName) return;
+      const confirmed = confirm(`Usunąć wydarzenie \"${currentEventName}\" z tego urządzenia?`);
+      if (!confirmed) return;
+      delete store.events[currentEventName];
+      if (store.lastEvent === currentEventName) store.lastEvent = "";
+      currentEventName = "";
+      eventInput.value = "";
+      saveStore();
+      render();
+    }
+
+    function formatRecentDate(iso) {
+      if (!iso) return "";
+      try {
+        return new Intl.DateTimeFormat("pl-PL", {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(new Date(iso));
+      } catch {
+        return "";
+      }
+    }
+
+    function renderRecentEvents() {
+      const entries = Object.entries(store.events)
+        .sort((a, b) => new Date(b[1].updatedAt || b[1].createdAt || 0) - new Date(a[1].updatedAt || a[1].createdAt || 0))
+        .slice(0, 8);
+
+      if (!entries.length) {
+        recentWrap.style.display = "none";
+        recentEventsEl.innerHTML = "";
+        return;
+      }
+
+      recentWrap.style.display = "block";
+      recentEventsEl.innerHTML = entries.map(([name, data]) => {
+        return `<button class="chip" type="button" data-event="${escapeHtml(name)}">${escapeHtml(name)} · ${escapeHtml(formatRecentDate(data.updatedAt || data.createdAt))}</button>`;
+      }).join("");
+
+      recentEventsEl.querySelectorAll(".chip").forEach(btn => {
+        btn.addEventListener("click", () => openEvent(btn.dataset.event));
+      });
+    }
+
+    function renderChecklist() {
+      if (!currentEventName || !store.events[currentEventName]) {
+        checklistEl.innerHTML = `<div class="empty">Najpierw wpisz nazwę wydarzenia i kliknij <strong>Otwórz</strong>.</div>`;
+        currentEventEl.textContent = "Brak wybranego wydarzenia";
+        summaryEl.textContent = "0 / 0 done";
+        progressFillEl.style.width = "0%";
+        return;
+      }
+
+      const event = store.events[currentEventName];
+      const doneCount = event.items.filter(item => item.status === "done").length;
+      const progressCount = event.items.filter(item => item.status === "in_progress").length;
+      const total = event.items.length;
+      const percent = total ? (doneCount / total) * 100 : 0;
+
+      currentEventEl.textContent = currentEventName;
+      summaryEl.textContent = `${doneCount} / ${total} done · ${progressCount} in progress`;
+      progressFillEl.style.width = `${percent}%`;
+
+      checklistEl.innerHTML = event.items.map(item => `
+        <button class="item ${item.status}" type="button" data-id="${item.id}" aria-label="${escapeHtml(item.label)} status ${item.status}">
+          <div class="item-label">${escapeHtml(item.label)}</div>
+          <div class="badge">${STATUS_LABELS[item.status]}</div>
+        </button>
+      `).join("");
+
+      checklistEl.querySelectorAll(".item").forEach(button => {
+        button.addEventListener("click", () => cycleStatus(Number(button.dataset.id)));
+      });
+    }
+
+    function render() {
+      renderRecentEvents();
+      renderChecklist();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    openBtn.addEventListener("click", () => openEvent(eventInput.value));
+    eventInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") openEvent(eventInput.value);
+    });
+    resetBtn.addEventListener("click", resetCurrentEvent);
+    deleteBtn.addEventListener("click", deleteCurrentEvent);
+
+    if (store.lastEvent && store.events[store.lastEvent]) {
+      currentEventName = store.lastEvent;
+      eventInput.value = store.lastEvent;
+    }
+
+    render();
+  </script>
+</body>
+</html>
