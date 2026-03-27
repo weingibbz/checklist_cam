@@ -6,22 +6,25 @@
   <title>NFM - Checklista operatora</title>
   <style>
     :root {
-      --bg: #f4f5f7;
-      --panel: #ffffff;
-      --text: #1e2430;
-      --muted: #6b7280;
-      --line: #dde2ea;
+      --bg: #f3f5f8;
+      --panel: rgba(255,255,255,0.92);
+      --panel-solid: #ffffff;
+      --text: #19212d;
+      --muted: #667085;
+      --line: #dde3ec;
       --shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+      --shadow-soft: 0 8px 20px rgba(16, 24, 40, 0.05);
       --todo-bg: #ffffff;
-      --todo-border: #d9dee8;
-      --progress-bg: #fff2df;
-      --progress-border: #ffb84d;
-      --progress-text: #9a5a00;
-      --done-bg: #e8f7ec;
-      --done-border: #37b26c;
-      --done-text: #17653b;
-      --accent: #334155;
-      --radius: 18px;
+      --todo-border: #d6dde8;
+      --progress-bg: #fff4e5;
+      --progress-border: #f5a623;
+      --progress-text: #9b5a00;
+      --done-bg: #e9f8ee;
+      --done-border: #32b268;
+      --done-text: #145c34;
+      --accent: #25364d;
+      --radius: 20px;
+		--sticky-gap: 0px;
     }
 
     * { box-sizing: border-box; }
@@ -29,41 +32,38 @@
     html, body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(180deg, #eef1f5 0%, #f7f8fa 100%);
+      min-height: 100%;
+      background: linear-gradient(180deg, #eef2f6 0%, #f7f8fb 100%);
       color: var(--text);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      min-height: 100%;
     }
 
-    body {
-      padding: 0;
-    }
+    body { overflow-x: hidden; }
 
     .app {
-      max-width: 760px;
+      max-width: 860px;
       margin: 0 auto;
-      min-height: 100vh;
-      padding: max(16px, env(safe-area-inset-top)) 14px max(22px, env(safe-area-inset-bottom));
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      padding-top: 6px;
-      backdrop-filter: blur(12px);
+      padding: max(16px, env(safe-area-inset-top)) 14px max(28px, env(safe-area-inset-bottom));
     }
 
     .panel {
-      background: rgba(255,255,255,0.92);
-      border: 1px solid rgba(221,226,234,0.9);
-      border-radius: 22px;
+      background: var(--panel);
+      border: 1px solid rgba(221, 227, 236, 0.92);
+      border-radius: 24px;
       box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-wrap {
+       position: relative;
+		z-index: 1;
+		padding-top: 4px;
+      padding-top: 4px;
+      margin-bottom: 12px;
     }
 
     .hero {
       padding: 18px 16px 16px;
-      margin-bottom: 12px;
     }
 
     .eyebrow {
@@ -73,13 +73,13 @@
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 8px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(24px, 5vw, 34px);
-      line-height: 1.05;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.03;
       letter-spacing: -0.03em;
     }
 
@@ -87,19 +87,20 @@
       margin-top: 8px;
       color: var(--muted);
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.45;
+      max-width: 62ch;
     }
 
     .controls {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
       margin-top: 16px;
     }
 
     input[type="text"] {
       width: 100%;
-      min-height: 54px;
+      min-height: 56px;
       border-radius: 16px;
       border: 1px solid var(--line);
       background: #fff;
@@ -111,21 +112,22 @@
     }
 
     input[type="text"]:focus {
-      border-color: #9fb2cc;
+      border-color: #97aacc;
       box-shadow: 0 0 0 4px rgba(86, 118, 161, 0.12);
     }
 
     button {
       border: 0;
       border-radius: 16px;
-      min-height: 54px;
+      min-height: 56px;
       padding: 0 16px;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       color: #fff;
       background: var(--accent);
       cursor: pointer;
-      box-shadow: 0 8px 18px rgba(51, 65, 85, 0.18);
+      box-shadow: 0 8px 18px rgba(37, 54, 77, 0.18);
+      -webkit-tap-highlight-color: transparent;
     }
 
     button.secondary {
@@ -142,35 +144,75 @@
       margin-top: 12px;
     }
 
+    .recent-wrap {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .mini-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+
+    .recent {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      min-height: 40px;
+      border-radius: 999px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: none;
+    }
+
+    .status-wrap {
+	  position: sticky;
+	  top: 4px;
+	  z-index: 40;
+    }
+
     .statusbar {
-      margin-bottom: 12px;
-      padding: 16px;
+      padding: 14px 16px 14px;
     }
 
     .status-top {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 10px;
     }
 
     .event-name {
-      font-weight: 800;
-      font-size: 16px;
+      font-weight: 900;
+      font-size: 17px;
       line-height: 1.2;
+      letter-spacing: -0.02em;
     }
 
     .meta {
       color: var(--muted);
       font-size: 13px;
       white-space: nowrap;
+      text-align: right;
+      padding-top: 2px;
     }
 
     .progress-track {
       height: 12px;
       width: 100%;
-      background: #e6ebf2;
+      background: #e7edf4;
       border-radius: 999px;
       overflow: hidden;
     }
@@ -178,13 +220,13 @@
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #ffb84d 0%, #37b26c 100%);
+      background: linear-gradient(90deg, #f5a623 0%, #32b268 100%);
       transition: width 180ms ease;
     }
 
     .legend {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
       margin-top: 10px;
       font-size: 12px;
@@ -205,45 +247,69 @@
     }
 
     .dot.todo { background: #d4dbe5; }
-    .dot.progress { background: #ffb84d; }
-    .dot.done { background: #37b26c; }
+    .dot.progress { background: #f5a623; }
+    .dot.done { background: #32b268; }
 
-    .section-title {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-weight: 800;
+    .content {
+      display: grid;
+      gap: 18px;
+    }
+
+    .section-card {
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(221, 227, 236, 0.92);
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      padding: 14px 12px 12px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 6px 10px;
+    }
+
+    .section-name {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+    }
+
+    .section-meta {
       color: var(--muted);
-      margin: 18px 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
     }
 
     .list {
       display: grid;
       gap: 10px;
-      margin-bottom: 18px;
     }
 
     .item {
       width: 100%;
       text-align: left;
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       padding: 16px 16px;
-      min-height: 72px;
+      min-height: 80px;
       border: 2px solid var(--todo-border);
-      border-radius: var(--radius);
+      border-radius: 18px;
       background: var(--todo-bg);
       color: var(--text);
       transition: transform 80ms ease, background 120ms ease, border-color 120ms ease;
-      -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     }
 
-    .item:active {
-      transform: scale(0.992);
-    }
+    .item:active { transform: scale(0.992); }
 
     .item.todo {
       background: var(--todo-bg);
@@ -264,101 +330,82 @@
     }
 
     .item-label {
-      font-size: 17px;
-      line-height: 1.25;
-      font-weight: 700;
+      min-width: 0;
+      font-size: 18px;
+      line-height: 1.26;
+      font-weight: 800;
       letter-spacing: -0.01em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .badge {
-      min-width: 104px;
+      width: 126px;
+      flex: 0 0 126px;
       text-align: center;
       border-radius: 999px;
       padding: 10px 12px;
       font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
+      font-weight: 900;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      background: rgba(255,255,255,0.72);
-      border: 1px solid rgba(0,0,0,0.06);
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(0,0,0,0.07);
+      justify-self: end;
+      align-self: center;
     }
 
     .empty {
-      padding: 24px 16px;
+      padding: 26px 18px;
       text-align: center;
       color: var(--muted);
       font-size: 15px;
       line-height: 1.5;
-    }
-
-    .recent {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .chip {
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--text);
-      min-height: 40px;
-      border-radius: 999px;
-      padding: 0 14px;
-      font-size: 13px;
-      font-weight: 700;
-      box-shadow: none;
+      background: rgba(255,255,255,0.72);
+      border: 1px dashed var(--line);
+      border-radius: 20px;
     }
 
     .footer-note {
       color: var(--muted);
       font-size: 12px;
       text-align: center;
-      padding: 8px 12px 2px;
+      padding: 6px 10px 2px;
     }
 
-    @media (max-width: 560px) {
-      .controls {
-        grid-template-columns: 1fr;
-      }
-
-      button,
-      input[type="text"] {
-        width: 100%;
-      }
-
+    @media (max-width: 640px) {
+      .controls { grid-template-columns: 1fr; }
+      button, input[type="text"] { width: 100%; }
+      .status-top { flex-direction: column; align-items: flex-start; }
+      .meta { white-space: normal; text-align: left; }
+      .section-head { flex-direction: column; align-items: flex-start; }
       .item {
-        grid-template-columns: 1fr;
-        align-items: start;
+        grid-template-columns: minmax(0, 1fr) 112px;
+        gap: 12px;
+        padding: 15px 14px;
+        min-height: 84px;
       }
-
+      .item-label { font-size: 17px; }
       .badge {
-        min-width: 0;
-        justify-self: start;
-      }
-
-      .status-top {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .meta {
-        white-space: normal;
+        width: 112px;
+        flex-basis: 112px;
+        font-size: 11px;
+        padding: 9px 8px;
       }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="topbar">
-      <section class="hero panel">
+    <div class="hero-wrap" id="heroWrap">
+      <section class="hero panel" id="heroPanel">
         <div class="eyebrow">NFM / mobilna checklista</div>
         <h1>Checklista operatora</h1>
-        <div class="sub">Tapnij element raz, by ustawić <strong>in progress</strong>, drugi raz <strong>done</strong>, trzeci raz zresetuje status. Bez logowania, bez bazy, bez kolejnego systemu, który trzeba niańczyć.</div>
+        <div class="sub">Najpierw wpisz nazwę wydarzenia i otwórz event. Potem każdy kafelek działa cyklicznie: <strong>todo</strong> → <strong>in progress</strong> → <strong>done</strong> → reset. Bez logowania, bez kolejnej infrastruktury, która będzie kiedyś umierać po cichu.</div>
 
         <div class="controls">
           <input id="eventInput" type="text" placeholder="Wpisz nazwę wydarzenia, np. Anaklasis 12.04.2026" />
-          <button id="openBtn">Otwórz</button>
+          <button id="openBtn" type="button">Otwórz</button>
         </div>
 
         <div class="actions">
@@ -366,77 +413,138 @@
           <button id="deleteBtn" class="secondary" type="button">Usuń wydarzenie</button>
         </div>
 
-        <div id="recentWrap" style="display:none;">
-          <div class="section-title" style="margin-top:14px; margin-bottom:8px;">Ostatnie wydarzenia</div>
+        <div id="recentWrap" class="recent-wrap">
+          <div class="mini-title">Ostatnie wydarzenia</div>
           <div id="recentEvents" class="recent"></div>
         </div>
       </section>
     </div>
 
-    <section class="statusbar panel">
-      <div class="status-top">
-        <div class="event-name" id="currentEvent">Brak wybranego wydarzenia</div>
-        <div class="meta" id="summary">0 / 0 done</div>
-      </div>
-      <div class="progress-track" aria-hidden="true">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <div class="legend">
-        <span><i class="dot todo"></i> do zrobienia</span>
-        <span><i class="dot progress"></i> w toku</span>
-        <span><i class="dot done"></i> gotowe</span>
-      </div>
-    </section>
+    <div class="status-wrap" id="statusWrap">
+      <section class="statusbar panel">
+        <div class="status-top">
+          <div class="event-name" id="currentEvent">Brak wybranego wydarzenia</div>
+          <div class="meta" id="summary">0 / 0 done</div>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="legend">
+          <span><i class="dot todo"></i> todo</span>
+          <span><i class="dot progress"></i> in progress</span>
+          <span><i class="dot done"></i> done</span>
+        </div>
+      </section>
+    </div>
 
-    <div class="section-title">Lista</div>
-    <main id="checklist" class="list panel" style="padding: 10px;"></main>
+    <main id="checklistContent" class="content"></main>
 
     <div class="footer-note">Dane zapisują się lokalnie w tej przeglądarce na tym urządzeniu.</div>
   </div>
 
   <script>
-    const CHECKLIST_ITEMS = [
-      "Kamera gotowa do pracy",
-      "Baterie naładowane",
-      "Zapasowe baterie spakowane",
-      "Karty pamięci sformatowane",
-      "Zapasowe karty pamięci spakowane",
-      "Statyw / mocowanie zabrane",
-      "Ładowarki i zasilacze spakowane",
-      "Przewody i adaptery spakowane",
-      "Ustawienia nagrania sprawdzone",
-      "Balans bieli sprawdzony",
-      "Ekspozycja sprawdzona",
-      "Ostrość i test nagrania wykonane",
-      "Dźwięk referencyjny sprawdzony",
-      "Sprzęt oznaczony i gotowy do transportu",
-      "Po nagraniu: materiał zabezpieczony"
+    const CHECKLIST_SECTIONS = [
+      {
+        id: "prep",
+        name: "Przed wyjściem / pakowanie",
+        items: [
+          "Kamera główna sprawdzona i gotowa do pracy",
+          "Baterie do kamery naładowane",
+          "Zapasowe baterie spakowane",
+          "Karty pamięci sformatowane i opisane",
+          "Zapasowe karty pamięci spakowane",
+          "Statyw / monopod / mocowanie zabrane zgodnie z planem",
+          "Zasilacz, ładowarki i przedłużacz spakowane",
+          "Kable, adaptery i redukcje spakowane",
+          "Szmatka / blower / podstawowe czyszczenie optyki zabrane",
+          "Słuchawki lub odsłuch referencyjny zabrane",
+          "Telefon naładowany i wolne miejsce na referencje / komunikację",
+          "Lista ujęć lub ustalenia produkcyjne sprawdzone"
+        ]
+      },
+      {
+        id: "onsite",
+        name: "Na miejscu / przed nagraniem",
+        items: [
+          "Dotarcie z odpowiednim zapasem czasu potwierdzone",
+          "Kontakt z koordynatorem / producentem wykonany",
+          "Miejsce ustawienia kamery potwierdzone",
+          "Kadra główna ustawiona i zaakceptowana",
+          "Horyzont / poziom kadru sprawdzony",
+          "Ekspozycja ustawiona pod warunki zastane",
+          "Balans bieli ustawiony lub świadomie zablokowany",
+          "Format nagrania, FPS i kodek sprawdzone",
+          "Czas / pojemność nośników wystarczające na cały materiał",
+          "Stabilność statywu i bezpieczeństwo stanowiska sprawdzone",
+          "Test nagrania obrazu wykonany",
+          "Dźwięk referencyjny lub poziom sygnału sprawdzony"
+        ]
+      },
+      {
+        id: "recording",
+        name: "W trakcie nagrania",
+        items: [
+          "Rejestracja uruchomiona odpowiednio wcześnie",
+          "Kontrola REC i czasu nagrania prowadzona w trakcie",
+          "Bateria i pojemność karty monitorowane",
+          "Kadr utrzymany zgodnie z ustaleniami",
+          "Ostrość kontrolowana po zmianach światła / ruchu",
+          "Niepożądane przeszkody w kadrze wyłapywane na bieżąco",
+          "Operator gotowy na restart nagrania / zmianę nośnika bez paniki",
+          "Kluczowe momenty wydarzenia nieprzegapione"
+        ]
+      },
+      {
+        id: "after",
+        name: "Po nagraniu / zabezpieczenie materiału",
+        items: [
+          "Nagranie zatrzymane dopiero po bezpiecznym zakończeniu wydarzenia",
+          "Materiał wstępnie sprawdzony po nagraniu",
+          "Nośniki oznaczone i odseparowane od pustych",
+          "Karty zabezpieczone do transportu",
+          "Informacja o zakończeniu realizacji przekazana koordynatorowi",
+          "Sprzęt spakowany i sprawdzony przed wyjściem z miejsca",
+          "Materiał przekazany / zgrany zgodnie z ustaleniami",
+          "Backup lub dalsze kroki po nagraniu potwierdzone"
+        ]
+      }
     ];
 
-    const STORAGE_KEY = "nfm_operator_checklist_v1";
+    const STORAGE_KEY = "nfm_operator_checklist_v2";
     const STATUSES = ["todo", "in_progress", "done"];
     const STATUS_LABELS = {
-      todo: "todo",
-      in_progress: "in progress",
-      done: "done"
+      todo: "TODO",
+      in_progress: "IN PROGRESS",
+      done: "DONE"
     };
 
     const eventInput = document.getElementById("eventInput");
     const openBtn = document.getElementById("openBtn");
     const resetBtn = document.getElementById("resetBtn");
     const deleteBtn = document.getElementById("deleteBtn");
-    const checklistEl = document.getElementById("checklist");
+    const checklistContentEl = document.getElementById("checklistContent");
     const currentEventEl = document.getElementById("currentEvent");
     const summaryEl = document.getElementById("summary");
     const progressFillEl = document.getElementById("progressFill");
     const recentWrap = document.getElementById("recentWrap");
     const recentEventsEl = document.getElementById("recentEvents");
+    const statusWrap = document.getElementById("statusWrap");
+    const heroWrap = document.getElementById("heroWrap");
 
     let store = loadStore();
     let currentEventName = "";
 
-    function createDefaultItems() {
-      return CHECKLIST_ITEMS.map((label, index) => ({ id: index + 1, label, status: "todo" }));
+    function buildDefaultSections() {
+      return CHECKLIST_SECTIONS.map((section, sectionIndex) => ({
+        id: section.id,
+        name: section.name,
+        items: section.items.map((label, itemIndex) => ({
+          id: `${section.id}-${itemIndex + 1}`,
+          label,
+          status: "todo",
+          sortOrder: sectionIndex * 100 + itemIndex
+        }))
+      }));
     }
 
     function loadStore() {
@@ -456,6 +564,11 @@
       return name.trim().replace(/\s+/g, " ");
     }
 
+    function ensureHeroMetrics() {
+      const heroHeight = Math.ceil(heroWrap.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--hero-height", `${heroHeight}px`);
+    }
+
     function openEvent(name) {
       const cleanName = normalizeName(name);
       if (!cleanName) return;
@@ -464,7 +577,7 @@
         store.events[cleanName] = {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          items: createDefaultItems()
+          sections: buildDefaultSections()
         };
       }
 
@@ -474,29 +587,37 @@
       saveStore();
       eventInput.value = cleanName;
       render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function cycleStatus(itemId) {
-      if (!currentEventName) return;
-      const event = store.events[currentEventName];
+    function getCurrentEvent() {
+      return currentEventName ? store.events[currentEventName] : null;
+    }
+
+    function cycleStatus(sectionId, itemId) {
+      const event = getCurrentEvent();
       if (!event) return;
 
-      const item = event.items.find(x => x.id === itemId);
+      const section = event.sections.find(x => x.id === sectionId);
+      if (!section) return;
+      const item = section.items.find(x => x.id === itemId);
       if (!item) return;
 
       const currentIndex = STATUSES.indexOf(item.status);
       item.status = STATUSES[(currentIndex + 1) % STATUSES.length];
       event.updatedAt = new Date().toISOString();
       saveStore();
-      render();
+      renderChecklist();
+      renderRecentEvents();
     }
 
     function resetCurrentEvent() {
-      if (!currentEventName) return;
+      const event = getCurrentEvent();
+      if (!event) return;
       const confirmed = confirm(`Zresetować wszystkie statusy dla wydarzenia \"${currentEventName}\"?`);
       if (!confirmed) return;
-      store.events[currentEventName].items = createDefaultItems();
-      store.events[currentEventName].updatedAt = new Date().toISOString();
+      event.sections = buildDefaultSections();
+      event.updatedAt = new Date().toISOString();
       saveStore();
       render();
     }
@@ -511,6 +632,10 @@
       eventInput.value = "";
       saveStore();
       render();
+    }
+
+    function flattenItems(sections) {
+      return sections.flatMap(section => section.items);
     }
 
     function formatRecentDate(iso) {
@@ -549,39 +674,58 @@
     }
 
     function renderChecklist() {
-      if (!currentEventName || !store.events[currentEventName]) {
-        checklistEl.innerHTML = `<div class="empty">Najpierw wpisz nazwę wydarzenia i kliknij <strong>Otwórz</strong>.</div>`;
+      const event = getCurrentEvent();
+
+      if (!event) {
+        statusWrap.style.display = "none";
         currentEventEl.textContent = "Brak wybranego wydarzenia";
         summaryEl.textContent = "0 / 0 done";
         progressFillEl.style.width = "0%";
+        checklistContentEl.innerHTML = `<div class="empty">Najpierw wpisz nazwę wydarzenia i kliknij <strong>Otwórz</strong>. Potem checklista pojawi się poniżej w czytelnych sekcjach.</div>`;
         return;
       }
 
-      const event = store.events[currentEventName];
-      const doneCount = event.items.filter(item => item.status === "done").length;
-      const progressCount = event.items.filter(item => item.status === "in_progress").length;
-      const total = event.items.length;
+      statusWrap.style.display = "block";
+
+      const items = flattenItems(event.sections);
+      const total = items.length;
+      const doneCount = items.filter(item => item.status === "done").length;
+      const progressCount = items.filter(item => item.status === "in_progress").length;
       const percent = total ? (doneCount / total) * 100 : 0;
 
       currentEventEl.textContent = currentEventName;
       summaryEl.textContent = `${doneCount} / ${total} done · ${progressCount} in progress`;
       progressFillEl.style.width = `${percent}%`;
 
-      checklistEl.innerHTML = event.items.map(item => `
-        <button class="item ${item.status}" type="button" data-id="${item.id}" aria-label="${escapeHtml(item.label)} status ${item.status}">
-          <div class="item-label">${escapeHtml(item.label)}</div>
-          <div class="badge">${STATUS_LABELS[item.status]}</div>
-        </button>
-      `).join("");
+      checklistContentEl.innerHTML = event.sections.map(section => {
+        const doneInSection = section.items.filter(item => item.status === "done").length;
+        return `
+          <section class="section-card">
+            <div class="section-head">
+              <h2 class="section-name">${escapeHtml(section.name)}</h2>
+              <div class="section-meta">${doneInSection} / ${section.items.length} done</div>
+            </div>
+            <div class="list">
+              ${section.items.map(item => `
+                <button class="item ${item.status}" type="button" data-section-id="${escapeHtml(section.id)}" data-id="${escapeHtml(item.id)}" aria-label="${escapeHtml(item.label)} status ${item.status}">
+                  <div class="item-label">${escapeHtml(item.label)}</div>
+                  <div class="badge">${STATUS_LABELS[item.status]}</div>
+                </button>
+              `).join("")}
+            </div>
+          </section>
+        `;
+      }).join("");
 
-      checklistEl.querySelectorAll(".item").forEach(button => {
-        button.addEventListener("click", () => cycleStatus(Number(button.dataset.id)));
+      checklistContentEl.querySelectorAll(".item").forEach(button => {
+        button.addEventListener("click", () => cycleStatus(button.dataset.sectionId, button.dataset.id));
       });
     }
 
     function render() {
       renderRecentEvents();
       renderChecklist();
+      ensureHeroMetrics();
     }
 
     function escapeHtml(value) {
@@ -599,6 +743,14 @@
     });
     resetBtn.addEventListener("click", resetCurrentEvent);
     deleteBtn.addEventListener("click", deleteCurrentEvent);
+
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => ensureHeroMetrics());
+      ro.observe(heroWrap);
+    }
+
+    window.addEventListener("resize", ensureHeroMetrics);
+    window.addEventListener("load", ensureHeroMetrics);
 
     if (store.lastEvent && store.events[store.lastEvent]) {
       currentEventName = store.lastEvent;
